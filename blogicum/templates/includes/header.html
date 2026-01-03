@@ -1,0 +1,53 @@
+{% load static %}
+<header>
+  <nav class="navbar navbar-light" style="background-color: lightskyblue">
+    <div class="container">
+      <a class="navbar-brand" href="{% url 'blog:index' %}">
+        <img src="{% static 'img/logo.png' %}" width="30" height="30" class="d-inline-block align-top" alt="">
+        Блогикум
+      </a>
+      {% with request.resolver_match.view_name as view_name %}
+        <ul class="nav nav-pills align-items-center">
+          <li class="nav-item">
+            <a class="nav-link {% if view_name == 'pages:about' %} active {% endif %}" 
+               href="{% url 'pages:about' %}">
+              О проекте
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% if view_name == 'pages:rules' %} active {% endif %}" 
+               href="{% url 'pages:rules' %}">
+              Правила
+            </a>
+          </li>
+          {% if user.is_authenticated %}
+            <div class="btn-group ms-3" role="group" aria-label="User actions">
+              <a class="btn btn-outline-primary" href="{% url 'blog:post_create' %}">
+                Написать пост
+              </a>
+              <a class="btn btn-outline-primary" href="{% url 'blog:profile' user.username %}">
+                {{ user.username }}
+              </a>
+              <!-- ФОРМА для выхода вместо ссылки -->
+              <form action="{% url 'logout' %}" method="post" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-primary">
+                  Выйти
+                </button>
+              </form>
+            </div>
+          {% else %}
+            <div class="btn-group ms-3" role="group" aria-label="Authentication">
+              <a class="btn btn-outline-primary" href="{% url 'login' %}">
+                Войти
+              </a>
+              <a class="btn btn-outline-primary" href="{% url 'blog:register' %}">
+                Регистрация
+              </a>
+            </div>
+          {% endif %}
+        </ul>
+      {% endwith %}
+    </div>
+  </nav>
+</header>

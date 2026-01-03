@@ -1,0 +1,7 @@
+{% if post.category and post.category.is_published %}
+  <a class="text-muted" href="{% url 'blog:category_posts' post.category.slug %}">
+    {{ post.category.title }}
+  </a>
+{% else %}
+  <span class="text-danger">Категория снята с публикации</span>
+{% endif %}

@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% load django_bootstrap5 %}
+{% block title %}
+  {% if '/edit_comment/' in request.path %}
+    Редактирование комментария
+  {% else %}
+    Удаление комментария
+  {% endif %}
+{% endblock %}
+{% block content %}
+  {% if user.is_authenticated %}
+    <div class="col d-flex justify-content-center">
+      <div class="card" style="width: 40rem;">
+        <div class="card-header">
+          {% if '/edit_comment/' in request.path %}
+            Редактирование комментария
+          {% else %}
+            Удаление комментария
+          {% endif %}
+        </div>
+        <div class="card-body">
+          <form method="post"
+            {% if '/edit_comment/' in request.path %}
+              action="{% url 'blog:edit_comment' comment.post.id comment.id %}"
+            {% else %}
+              action="{% url 'blog:delete_comment' comment.post.id comment.id %}"
+            {% endif %}>
+            {% csrf_token %}
+            
+            {% if '/edit_comment/' in request.path %}
+              {% bootstrap_form form %}
+            {% else %}
+              <div class="alert alert-danger">
+                <h5 class="alert-heading">Внимание!</h5>
+                <p>Вы собираетесь удалить свой комментарий:</p>
+                
+                <div class="card my-3">
+                  <div class="card-body">
+                    <blockquote class="blockquote mb-0">
+                      <p>{{ comment.text|linebreaksbr }}</p>
+                      <footer class="blockquote-footer mt-2">
+                        <small>
+                          {{ comment.author.username }}, 
+                          {{ comment.created_at|date:"d E Y, H:i" }}
+                        </small>
+                      </footer>
+                    </blockquote>
+                  </div>
+                </div>
+                
+                <p class="mb-0">
+                  <strong>Это действие нельзя отменить.</strong> 
+                  Комментарий будет удалён без возможности восстановления.
+                </p>
+              </div>
+              <div class="form-check mb-4">
+                <input class="form-check-input" type="checkbox" 
+                       name="confirm" id="confirm_delete" required>
+                <label class="form-check-label text-danger fw-bold" for="confirm_delete">
+                  Да, я понимаю последствия и хочу удалить этот комментарий
+                </label>
+              </div>
+            {% endif %}
+            <div class="d-flex justify-content-between">
+              {% if '/edit_comment/' in request.path %}
+                {% bootstrap_button button_type="submit" content="Сохранить" %}
+              {% else %}
+                {% bootstrap_button button_type="submit" button_class="btn-danger" content="Удалить комментарий" %}
+              {% endif %}
+              <a href="{% url 'blog:post_detail' comment.post.id %}#comment-{{ comment.id }}" 
+                 class="btn btn-outline-secondary">
+                Отмена
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+{% endblock %}

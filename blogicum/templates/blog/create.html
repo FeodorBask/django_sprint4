@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% load django_bootstrap5 %}
+{% block title %}
+  {% if '/edit/' in request.path %}
+    Редактирование публикации
+  {% elif "/delete/" in request.path %}
+    Удаление публикации
+  {% else %}
+    Добавление публикации
+  {% endif %}
+{% endblock %}
+{% block content %}
+  <div class="col d-flex justify-content-center">
+    <div class="card" style="width: 40rem;">
+      <div class="card-header">
+        {% if '/edit/' in request.path %}
+          Редактирование публикации
+        {% elif '/delete/' in request.path %}
+          Удаление публикации
+        {% else %}
+          Добавление публикации
+        {% endif %}
+      </div>
+      <div class="card-body">
+        {% if '/delete/' in request.path %}
+          <div class="alert alert-danger mb-4">
+            <h5>Внимание!</h5>
+            <p>Вы собираетесь удалить публикацию "<strong>{{ post.title }}</strong>".</p>
+            <p class="mb-0">Это действие <strong>нельзя отменить</strong>.</p>
+          </div>
+        {% endif %}
+        
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          {% if not '/delete/' in request.path %}
+            {% bootstrap_form form %}
+          {% else %}
+            <article>
+              {% if post.image %}
+                <a href="{{ post.image.url }}" target="_blank">
+                  <img class="border-3 rounded img-fluid img-thumbnail mb-2" src="{{ post.image.url }}">
+                </a>
+              {% endif %}
+              <p>{{ post.pub_date|date:"d E Y" }} | {% if post.location and post.location.is_published %}{{ post.location.name }}{% else %}Планета Земля{% endif %}<br>
+              <h3>{{ post.title }}</h3>
+              <p>{{ post.text|linebreaksbr }}</p>
+            </article>
+            <div class="form-check mb-3">
+              <input class="form-check-input" type="checkbox" name="confirm" id="confirm_delete" required>
+              <label class="form-check-label text-danger" for="confirm_delete">
+                Да, я хочу удалить эту публикацию
+              </label>
+            </div>
+          {% endif %}
+          
+          <div class="d-flex justify-content-between">
+            {% if '/delete/' in request.path %}
+              {% bootstrap_button button_type="submit" button_class="btn-danger" content="Удалить" %}
+            {% else %}
+              {% bootstrap_button button_type="submit" content="Сохранить" %}
+            {% endif %}
+            {% if post and post.id %}
+              <a href="{% url 'blog:post_detail' post.id %}" class="btn btn-outline-secondary">
+                Отмена
+              </a>
+            {% else %}
+              <a href="{% url 'blog:index' %}" class="btn btn-outline-secondary">
+                Отмена
+              </a>
+            {% endif %}
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}
