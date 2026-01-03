@@ -67,7 +67,6 @@ class CommentForm(forms.ModelForm):
         labels = {
             'text': '',
         }
-    
 
     def save(self, commit=True):
         instance = super().save(commit=False)

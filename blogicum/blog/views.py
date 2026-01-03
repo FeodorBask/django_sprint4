@@ -1,5 +1,4 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import Http404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
@@ -16,19 +15,9 @@ User = get_user_model()
 def profile(request, username):
     profile_user = get_object_or_404(User, username=username)
     now = timezone.now()
-
-     # Детальный дебаг
-    print(f"\n=== DETAILED DEBUG ===")
-    print(f"URL: {request.path}")
-    print(f"Request user: {request.user} (id: {getattr(request.user, 'id', 'None')})")
-    print(f"Profile user: {profile_user} (id: {profile_user.id})")
-    
-    # ВАЖНО: проверяем аутентификацию!
     is_owner = False
     if request.user.is_authenticated:
         is_owner = request.user.id == profile_user.id
-    print(f"is_owner (username compare): {is_owner}")
-    print(f"=== END DEBUG ===")
 
     if is_owner:
         post_list = Post.objects.select_related(
@@ -55,15 +44,7 @@ def profile(request, username):
         'is_owner': is_owner
     }
 
-    response =  render(request, 'blog/profile.html', context)
-
-    html = response.content.decode('utf-8')
-    if '/auth/edit_profile/' in html:
-        print(f"✓ HTML содержит ссылку на редактирование профиля")
-    if '/auth/password_change/' in html:
-        print(f"✓ HTML содержит ссылку на изменение пароля")
-    
-    return response
+    return render(request, 'blog/profile.html', context)
 
 
 def index(request):
@@ -121,19 +102,19 @@ def post_detail(request, post_id):
         is_published=True,
         category__is_published=True
     )
-    
+
     comments = post.comments.select_related('author').all()
-    
+
     form = CommentForm()
     print(f"Form created: {form}")
     print(f"Form fields: {form.fields}")
-    
+
     context = {
         'post': post,
         'comments': comments,
         'form': form,
     }
-    
+
     return render(request, 'blog/detail.html', context)
 
 
@@ -151,14 +132,13 @@ def post_create(request):
                     f'Пост будет опубликован '
                     f'{post.pub_date.strftime("%d.%m.%Y %H:%M")}'
                 )
-            
+
             messages.success(request, 'Пост успешно создан!')
             return redirect('blog:profile', username=request.user.username)
     else:
         form = PostForm()
-    
-    return render(request, 'blog/create.html', {'form': form})
 
+    return render(request, 'blog/create.html', {'form': form})
 
 
 @login_required
@@ -206,7 +186,7 @@ def post_delete(request, post_id):
 @login_required
 def add_comment(request, post_id):
     post = get_object_or_404(Post, pk=post_id)
-    
+
     if request.method == 'POST':
         form = CommentForm(request.POST)
         if form.is_valid():
@@ -280,13 +260,19 @@ def delete_comment(request, post_id, comment_id):
 
 
 def csrf_failure(request, reason=""):
-    return render(request, 'pages/403csrf.html', {'reason': reason}, status=403)
+    return render(request, 'pages/403csrf.html',
+                  {'reason': reason}, status=403)
+
 
 def page_not_found(request, exception):
-    return render(request, 'pages/404.html', {'exception': exception}, status=404)
+    return render(request, 'pages/404.html',
+                  {'exception': exception}, status=404)
+
 
 def server_error(request):
     return render(request, 'pages/500.html', status=500)
 
+
 def permission_denied(request, exception):
-    return render(request, 'pages/403csrf.html', {'exception': exception}, status=403)
+    return render(request, 'pages/403csrf.html',
+                  {'exception': exception}, status=403)

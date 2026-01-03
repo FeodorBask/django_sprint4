@@ -28,7 +28,6 @@
               <a class="btn btn-outline-primary" href="{% url 'blog:profile' user.username %}">
                 {{ user.username }}
               </a>
-              <!-- ФОРМА для выхода вместо ссылки -->
               <form action="{% url 'logout' %}" method="post" class="d-inline">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-outline-primary">
