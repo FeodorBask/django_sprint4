@@ -19,10 +19,11 @@
           <strong>Email:</strong> {{ profile.email }}
         </p>
         {% if is_owner %}
-            <a href="blog:edit_profile" class="btn btn-primary">
+          <div class="mt-3">
+            <a href="{% url 'blog:edit_profile' %}" class="btn btn-primary">
               Редактировать профиль
             </a>
-            <a href="password_change" class="btn btn-secondary">
+            <a href="{% url 'password_change' %}" class="btn btn-secondary">
               Изменить пароль
             </a>
           </div>

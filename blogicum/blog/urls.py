@@ -15,6 +15,7 @@ urlpatterns = [
         name='category_posts'
     ),
     path('auth/login/', auth_views.LoginView.as_view(), name='login'),
+    path('profile/edit/', edit_profile, name='edit_profile'),
     path('profile/<str:username>/', views.profile, name='profile'),
     path('posts/create/', views.post_create, name='post_create'),
     path('posts/<int:post_id>/edit/', views.post_edit, name='edit_post'),
@@ -27,5 +28,4 @@ urlpatterns = [
     path('posts/<int:post_id>/delete_comment/<int:comment_id>/',
          views.delete_comment, name='delete_comment'),
     path('auth/registration/', register, name='register'),
-    path('auth/edit_profile/', edit_profile, name='edit_profile'),
 ]

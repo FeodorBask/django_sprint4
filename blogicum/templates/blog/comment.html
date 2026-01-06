@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load django_bootstrap5 %}
 {% block title %}
-  {% if '/edit_comment/' in request.path %}
+  {% if 'edit_comment' in request.path %}
     Редактирование комментария
   {% else %}
     Удаление комментария
@@ -12,7 +12,7 @@
     <div class="col d-flex justify-content-center">
       <div class="card" style="width: 40rem;">
         <div class="card-header">
-          {% if '/edit_comment/' in request.path %}
+          {% if 'edit_comment' in request.path %}
             Редактирование комментария
           {% else %}
             Удаление комментария
@@ -20,14 +20,14 @@
         </div>
         <div class="card-body">
           <form method="post"
-            {% if '/edit_comment/' in request.path %}
+            {% if 'edit_comment' in request.path %}
               action="{% url 'blog:edit_comment' comment.post.id comment.id %}"
             {% else %}
               action="{% url 'blog:delete_comment' comment.post.id comment.id %}"
             {% endif %}>
             {% csrf_token %}
             
-            {% if '/edit_comment/' in request.path %}
+            {% if 'edit_comment' in request.path %}
               {% bootstrap_form form %}
             {% else %}
               <div class="alert alert-danger">
@@ -62,7 +62,7 @@
               </div>
             {% endif %}
             <div class="d-flex justify-content-between">
-              {% if '/edit_comment/' in request.path %}
+              {% if 'edit_comment' in request.path %}
                 {% bootstrap_button button_type="submit" content="Сохранить" %}
               {% else %}
                 {% bootstrap_button button_type="submit" button_class="btn-danger" content="Удалить комментарий" %}

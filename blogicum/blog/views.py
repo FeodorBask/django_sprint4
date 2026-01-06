@@ -7,6 +7,7 @@ from django.contrib.auth import get_user_model
 from django.core.paginator import Paginator
 from .forms import PostForm, CommentForm
 from django.db.models import Count
+from django.http import Http404
 
 
 User = get_user_model()
@@ -97,22 +98,25 @@ def category_posts(request, category_slug):
 def post_detail(request, post_id):
     post = get_object_or_404(
         Post.objects.select_related('category', 'location', 'author'),
-        pk=post_id,
-        pub_date__lte=timezone.now(),
-        is_published=True,
-        category__is_published=True
+        pk=post_id
     )
 
-    comments = post.comments.select_related('author').all()
+    now = timezone.now()
 
+    if post.author != request.user:
+        if (not post.is_published
+                or post.pub_date > now
+                or not post.category.is_published):
+            raise Http404("Пост не найден")
+
+    comments = post.comments.select_related('author').all()
     form = CommentForm()
-    print(f"Form created: {form}")
-    print(f"Form fields: {form.fields}")
 
     context = {
         'post': post,
         'comments': comments,
         'form': form,
+        'now': now,
     }
 
     return render(request, 'blog/detail.html', context)
@@ -152,15 +156,14 @@ def post_edit(request, post_id):
         form = PostForm(
             request.POST,
             request.FILES,
-            instance=post,
-            user=request.user
+            instance=post
         )
         if form.is_valid():
             form.save()
             messages.success(request, 'Пост успешно обновлён!')
             return redirect('blog:post_detail', post_id=post.id)
     else:
-        form = PostForm(instance=post, user=request.user)
+        form = PostForm(instance=post)
 
     return render(request, 'blog/create.html', {'form': form})
 
