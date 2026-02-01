@@ -33,7 +33,7 @@
     
     <h3 class="mb-5 text-center">Публикации пользователя</h3>
     
-    {% if page_obj %}
+    {% if page_obj.object_list %}
       {% for post in page_obj %}
         <article class="mb-5">
           {% include "includes/post_card.html" %}

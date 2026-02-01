@@ -68,12 +68,6 @@ class CommentForm(forms.ModelForm):
             'text': '',
         }
 
-    def save(self, commit=True):
-        instance = super().save(commit=False)
-        if commit:
-            instance.save()
-        return instance
-
 
 class CommentEditForm(forms.ModelForm):
     class Meta:

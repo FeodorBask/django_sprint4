@@ -23,7 +23,9 @@ def profile(request, username):
     if is_owner:
         post_list = Post.objects.select_related(
             'category', 'location', 'author'
-        ).filter(author=profile_user).order_by('-pub_date')
+        ).filter(author=profile_user).annotate(
+            comment_count=Count('comments')
+        ).order_by('-pub_date')
     else:
         post_list = Post.objects.select_related(
             'category', 'location', 'author'
@@ -32,6 +34,8 @@ def profile(request, username):
             pub_date__lte=now,
             is_published=True,
             category__is_published=True
+        ).annotate(
+            comment_count=Count('comments')
         ).order_by('-pub_date')
 
     paginator = Paginator(post_list, 10)
@@ -82,6 +86,8 @@ def category_posts(request, category_slug):
         category=category,
         pub_date__lte=timezone.now(),
         is_published=True
+    ).annotate(
+        comment_count=Count('comments')
     ).order_by('-pub_date')
 
     paginator = Paginator(post_list, 10)
@@ -146,7 +152,7 @@ def post_create(request):
 
 
 @login_required
-def post_edit(request, post_id):
+def edit_post(request, post_id):
     post = get_object_or_404(Post, pk=post_id)
     if post.author != request.user:
         messages.error(request, 'Вы не можете редактировать чужие публикации.')
@@ -169,7 +175,7 @@ def post_edit(request, post_id):
 
 
 @login_required
-def post_delete(request, post_id):
+def delete_post(request, post_id):
     post = get_object_or_404(Post, pk=post_id)
     if post.author != request.user:
         messages.error(request, 'Вы не можете удалять чужие публикации.')
@@ -193,11 +199,9 @@ def add_comment(request, post_id):
     if request.method == 'POST':
         form = CommentForm(request.POST)
         if form.is_valid():
-            comment = Comment(
-                text=form.cleaned_data['text'],
-                post=post,
-                author=request.user
-            )
+            comment = form.save(commit=False)
+            comment.post = post
+            comment.author = request.user
             comment.save()
 
             messages.success(request, 'Комментарий добавлен!')
@@ -260,22 +264,3 @@ def delete_comment(request, post_id, comment_id):
         'comment': comment,
         'post': comment.post,
     })
-
-
-def csrf_failure(request, reason=""):
-    return render(request, 'pages/403csrf.html',
-                  {'reason': reason}, status=403)
-
-
-def page_not_found(request, exception):
-    return render(request, 'pages/404.html',
-                  {'exception': exception}, status=404)
-
-
-def server_error(request):
-    return render(request, 'pages/500.html', status=500)
-
-
-def permission_denied(request, exception):
-    return render(request, 'pages/403csrf.html',
-                  {'exception': exception}, status=403)
